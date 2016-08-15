@@ -47,13 +47,11 @@ cc_library(
     "src/zk_hashtable.c",
     "src/zk_log.c",
     "src/zookeeper.c",
-    "src/addrvec.c",
     # Private headers
     "build-x64/config.h",
     "src/hashtable/hashtable.h",
     "src/hashtable/hashtable_private.h",
     "src/hashtable/hashtable_itr.h",
-    "src/addrvec.h",
     "src/zk_adaptor.h",
   ],
   deps = [
