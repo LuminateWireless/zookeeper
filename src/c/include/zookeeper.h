@@ -186,6 +186,10 @@ extern ZOOAPI const int ZOO_ASSOCIATING_STATE;
 extern ZOOAPI const int ZOO_CONNECTED_STATE;
 // @}
 
+
+extern const char *zookeeper_state_to_string(int state);
+extern const char *zookeeper_event_to_string(int event);
+
 /**
  * @name Watch Types
  * These constants indicate the event that caused the watch event. They are
