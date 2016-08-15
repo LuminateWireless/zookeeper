@@ -61,6 +61,8 @@
 #include <pwd.h>
 #endif
 
+#include "third_party/google/base/dynamic_annotations.h"
+
 #define IF_DEBUG(x) if(logLevel==ZOO_LOG_LEVEL_DEBUG) {x;}
 
 const int ZOOKEEPER_WRITE = 1 << 0;
@@ -365,7 +367,11 @@ static void free_auth_info(auth_list_head_t *auth_list)
 
 int is_unrecoverable(zhandle_t *zh)
 {
-    return (zh->state<0)? ZINVALIDSTATE: ZOK;
+  /** ANNOTATE_UNPROTECTED_READ is C++ only **/
+  ANNOTATE_IGNORE_READS_BEGIN();
+  int ret = (zh->state<0)? ZINVALIDSTATE: ZOK;
+  ANNOTATE_IGNORE_READS_END();
+  return ret;
 }
 
 zk_hashtable *exists_result_checker(zhandle_t *zh, int rc)
@@ -1705,10 +1711,12 @@ int zookeeper_interest(zhandle_t *zh, int *fd, int *interest,
         *interest = ZOOKEEPER_READ;
         /* we are interested in a write if we are connected and have something
          * to send, or we are waiting for a connect to finish. */
+        ANNOTATE_IGNORE_READS_BEGIN();  /* zh->to_send.head */
         if ((zh->to_send.head && (zh->state == ZOO_CONNECTED_STATE))
         || zh->state == ZOO_CONNECTING_STATE) {
             *interest |= ZOOKEEPER_WRITE;
         }
+        ANNOTATE_IGNORE_READS_END();
     }
     return api_epilog(zh,ZOK);
 }
@@ -2508,7 +2516,11 @@ int zookeeper_close(zhandle_t *zh)
     if (zh==0)
         return ZBADARGUMENTS;
 
+    // tsan complains 'data race' here, actually it's in close stage
+    // and it doesn't impact on production, so make it annotation here
+    ANNOTATE_IGNORE_READS_BEGIN();
     zh->close_requested=1;
+    ANNOTATE_IGNORE_READS_END();
     if (inc_ref_counter(zh,1)>1) {
         /* We have incremented the ref counter to prevent the
          * completions from calling zookeeper_close before we have
