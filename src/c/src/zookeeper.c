@@ -104,6 +104,10 @@ static __attribute__ ((unused)) const char* state2String(int state){
     return "INVALID_STATE";
 }
 
+const char *zookeeper_state_to_string(int state) {
+   return state2String(state);
+}
+
 const int ZOO_CREATED_EVENT = CREATED_EVENT_DEF;
 const int ZOO_DELETED_EVENT = DELETED_EVENT_DEF;
 const int ZOO_CHANGED_EVENT = CHANGED_EVENT_DEF;
@@ -128,6 +132,10 @@ static __attribute__ ((unused)) const char* watcherEvent2String(int ev){
         return "ZOO_NOTWATCHING_EVENT";
     }
     return "INVALID_EVENT";
+}
+
+const char *zookeeper_event_to_string(int event) {
+    return watcherEvent2String(event);
 }
 
 const int ZOO_PERM_READ = 1 << 0;
